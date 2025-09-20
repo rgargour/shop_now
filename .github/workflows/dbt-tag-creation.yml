@@ -1,0 +1,72 @@
+name: Tag on PR merge
+
+on:
+  workflow_run:
+    workflows: ["dbt CI"]        
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  create-tag:
+    if: >
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      # Find the merge commit SHA and its PR (to read labels for semver bump)
+      - name: Resolve meta (SHA & PR)
+        id: meta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          pr="$(gh api repos/${{ github.repository }}/commits/$SHA/pulls --jq '.[0].number' || true)"
+          echo "pr=$pr" >> $GITHUB_OUTPUT
+          labels=""
+          if [ -n "$pr" ]; then
+            labels="$(gh api repos/${{ github.repository }}/issues/$pr/labels --jq '.[].name' | tr '\n' ' ')"
+          fi
+          echo "labels=$labels" >> $GITHUB_OUTPUT
+
+      - name: Decide bump (labels -> major/minor/patch)
+        id: bump
+        run: |
+          labels='${{ steps.meta.outputs.labels }}'
+          if echo "$labels" | grep -qi 'semver:major'; then echo "level=major" >> $GITHUB_OUTPUT;
+          elif echo "$labels" | grep -qi 'semver:minor'; then echo "level=minor" >> $GITHUB_OUTPUT;
+          else echo "level=patch" >> $GITHUB_OUTPUT; fi
+
+      - name: Compute next tag
+        id: version
+        run: |
+          git fetch --tags --force
+          latest=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          ver="${latest#v}"; IFS='.' read -r MA MI PA <<<"${ver:-0.0.0}"
+          case "${{ steps.bump.outputs.level }}" in
+            major) MA=$((MA+1)); MI=0; PA=0 ;;
+            minor) MI=$((MI+1)); PA=0 ;;
+            patch) PA=$((PA+1)) ;;
+          esac
+          echo "new=v${MA}.${MI}.${PA}" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        env:
+          NEW_TAG: ${{ steps.version.outputs.new }}
+          SHA: ${{ steps.meta.outputs.sha }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$NEW_TAG" "$SHA" -m "Tag $NEW_TAG"
+          git push origin "$NEW_TAG"
