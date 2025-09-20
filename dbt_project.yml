@@ -19,11 +19,4 @@ models:
     gold:                  
       +materialized: table
       +schema: gold
-      +pre-hook:
-        - "{{ log('Building ' ~ this.identifier, info=True) }}"
-      +post-hook:
-        - "{{ analyze_relation(this) }}"
-seeds:
-  ShopNow:             
-    +schema: silver 
-    +quote_columns: false
+
