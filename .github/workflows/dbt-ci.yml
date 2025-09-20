@@ -1,0 +1,41 @@
+name: dbt CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    # Optionnel : lier à un environnement protégé (ex: prod)
+    # environment: prod
+
+    env:
+      # Expose la variable d'environnement à tous les steps du job
+      MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+      # Autres variables utiles
+      DBT_PROFILES_DIR: ./.github/dbt  # si tu versionnes un profiles.yml custom
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt + adapter MotherDuck
+        run: |
+          pip install --upgrade pip
+          pip install dbt-duckdb motherduck
+
+      - name: Install dbt packages
+        run: dbt deps --no-use-colors
+
+      - name: Run CI
+        # Évite d'echo la valeur du token !
+        run: |
+          dbt debug
+          dbt build 
