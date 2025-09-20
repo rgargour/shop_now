@@ -31,9 +31,6 @@ jobs:
           pip install --upgrade pip
           pip install dbt-duckdb==1.3.2 motherduck
 
-      - name: Install dbt packages
-        run: dbt deps --no-use-colors
-
       - name: Run CI
         # Évite d'echo la valeur du token !
         run: |
