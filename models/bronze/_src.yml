@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: ecommerce     
+    database: Ambient_it_dbt    # Nom de la source (utilisé dans dbt)
+    schema: bronze            # Schéma où se trouvent les tables brutes
+    
+    tables:
+      - name: customers_raw
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        loaded_at_field: "cast(created_at as timestamp)" 
+      - name: orders_raw
+      - name: products_raw
