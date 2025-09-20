@@ -16,7 +16,7 @@ jobs:
       # Expose la variable d'environnement à tous les steps du job
       MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
       # Autres variables utiles
-      DBT_PROFILES_DIR: ./.github/dbt  # si tu versionnes un profiles.yml custom
+      DBT_PROFILES_DIR: ./  # si tu versionnes un profiles.yml custom
 
     steps:
       - uses: actions/checkout@v4
