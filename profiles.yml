@@ -1,0 +1,7 @@
+
+ShopNow:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "md:Ambient_it_dbt?token={{ env_var('MOTHERDUCK_TOKEN') }}"

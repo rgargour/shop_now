@@ -1,0 +1,29 @@
+
+name: ShopNow        # nom du projet (même que profiles.yml si possible)
+version: 1.0
+config-version: 2
+
+profile: ShopNow  # doit correspondre au nom défini dans profiles.yml
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+
+models:
+  ShopNow:
+    silver:                
+      +materialized: view
+      +schema: silver
+    gold:                  
+      +materialized: table
+      +schema: gold
+      +pre-hook:
+        - "{{ log('Building ' ~ this.identifier, info=True) }}"
+      +post-hook:
+        - "{{ analyze_relation(this) }}"
+seeds:
+  ShopNow:             
+    +schema: silver 
+    +quote_columns: false
