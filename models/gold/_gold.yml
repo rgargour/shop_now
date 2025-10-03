@@ -1,0 +1,32 @@
+version: 2
+models:
+  - name: dim_customers
+    columns:
+      - name: customer_id
+        tests: [not_null, unique]
+      - name: customer_status
+        tests:
+          - accepted_values: {values: ['gold','silver','bronze']}
+      - name: customer_id
+        tests:
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+
+  - name: dim_products
+    tests:
+      - not_null:
+          column_name: product_id
+      - unique:
+          column_name: product_id
+  
+  - name: fct_orders
+    tests:
+      - not_null:
+          column_name: order_id
+
+tests:
+  - not_null:
+      column_name: created_at
+      where: "order_date >= date '2025-01-01'"
+      severity: warn
