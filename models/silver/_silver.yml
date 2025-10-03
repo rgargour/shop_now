@@ -1,0 +1,34 @@
+version: 2 
+models:
+  - name: stg_customers
+    tests:
+     - not_null:
+        column_name: customer_id
+     - unique:
+        column_name: customer_id
+
+  - name: stg_orders  
+    description: "{{ doc('orders') }}"
+    columns:
+       - name: order_id
+         description: "Identifiant de la commande"
+    tests:
+    - not_null:
+       column_name: order_id
+    - unique:
+       column_name: order_id
+    - accepted_values : 
+       column_name: status  
+       values: [1,2,3]
+       severity: warn
+
+    - dbt_utils.expression_is_true:  
+       expression: "amount is null or amount >= 0"
+       severity: warn
+
+
+  - name: stg_products
+    tests:
+    - not_null:
+       column_name: product_id
+
