@@ -1,0 +1,26 @@
+customer_id,first_name,last_name,email,address_line1,address_line2,city,postal_code,country,loyalty_tier,customer_status,marketing_opt_in,created_at,updated_at
+10,Alice,Martin, Alice.MARTIN @example.com ,12 Rue Victor Hugo,,Lyon,69002,FR,silver,active,True,2024-10-12 09:15:00,2025-06-01 10:22:11
+15,Brahim,Khaled, BRAHIM.KHALED@Example.com ,5 Rue des Lilas,Bat B,Paris,75011,FR,gold,active,True,2024-08-03 14:02:00,2025-03-15 08:00:00
+16,Camille,Durand,Camille.DURAND@example.com,8 Avenue Foch,,Paris,75116,FR,bronze,active,False,2024-12-21 18:10:00,2025-07-10 12:44:55
+17,Diego,Lopez,diego.lopez@example.com,22 Calle Sol,,Madrid,28001,ES,silver,inactive,False,2025-01-05 10:00:00,2025-05-05 10:30:00
+18,Emma,Rossi,  emma.ROSSI@example.com  ,10 Via Roma,,Milano,20121,IT,silver,active,True,2024-11-02 07:55:00,2025-02-20 11:11:11
+27,Fatou,Diop,fatou.diop@example.com,3 Rue des Fleurs,,Dakar,11000,SN,bronze,active,True,2025-03-01 16:40:00,2025-08-01 09:00:00
+28,Gaspard,Lemaire,GASPARD.LEMAIRE@EXAMPLE.COM ,1 Place Bellecour,,Lyon,69002,FR,silver,active,True,2024-09-15 12:00:00,2025-01-10 06:30:00
+32,Hiba,Alaoui,hiba. Alaoui@example.com,45 Bd Anfa,Appt 7,Casablanca,20000,MA,gold,active,True,2024-10-30 21:00:00,2025-07-19 13:33:33
+33,Imane,Benali,imane.benali@example.com,7 Rue du Lac,,Tunis,1053,TN,silver,active,True,2025-04-04 09:09:00,2025-07-22 10:10:10
+36,Jules,Moreau,jules.moreau@example.com,14 Rue de la Paix,,Paris,75002,FR,silver,active,False,2024-08-28 10:00:00,2024-12-01 08:45:00
+37,Kenza,Amrani,kenza.amrani@example.com,2 Rue Nationale,,Lille,59000,FR,bronze,active,True,2024-09-03 08:20:00,2025-02-01 09:30:00
+42,Leo,Dubois, LEO.DUBOIS@example.com,6 Quai des Célestins,,Paris,75004,FR,silver,active,True,2025-03-20 15:05:00,2025-07-02 10:20:00
+44,Maria,Gomez,maria.gomez@example.com,Calle Mayor 9,,Madrid,28013,ES,gold,active,True,2024-11-15 12:30:00,2025-06-30 09:00:00
+49,Nadia,Hassan,,11 Rue Molière,,Lyon,69001,FR,silver,inactive,False,2024-12-12 09:00:00,2025-01-10 12:00:00
+50,Omar,Haddad,omar.haddad@example.com,2 Rue Pasteur,,Marseille,13001,FR,bronze,active,True,2025-02-10 08:00:00,2025-07-15 18:05:00
+51,Paul,Henry,paul.HENRY@EXAMPLE.COM,3 Impasse des Arts,,Nantes,44000,FR,silver,active,True,2024-11-01 10:10:00,2025-05-10 11:00:00
+53,Quentin,Lambert,,5 Avenue du Prado,,Marseille,13008,FR,silver,active,True,2025-03-05 07:45:00,2025-06-06 09:09:09
+55,Rosa,Silva,ROSA.SILVA@EXAMPLE.com,Rua Augusta 20,,Lisboa,1100,PT,gold,active,True,2024-09-25 12:00:00,2025-07-01 07:07:07
+56,Samir,El Fassi,,10 Av. Mohammed V,,Rabat,10000,MA,silver,active,True,2025-01-18 19:00:00,2025-08-15 11:11:11
+58,Tara,Nguyen,tara.nguyen@ Example.com,4 Rue de la République,,Lyon,69002,FR,bronze,active,True,2024-10-05 11:11:11,2025-01-12 12:12:12
+15,Brahim,Khaled, BRAHIM.KHALED@Example.com ,5 Rue des Lilas,Bat C,Paris,75011,FR,gold,active,True,2024-08-03 14:02:30,2025-03-15 08:00:01
+28,Gaspard,Lemaire,GASPARD.LEMAIRE@EXAMPLE.COM ,1 Place Bellecour,,Lyon,69002,FR,silver,active,True,2025-03-06 08:00:00,2025-08-20 09:15:00
+33,Imane,Benali,imane.benali@example.com,7 Rue du Lac,,Tunis,1053,TN,silver,active,True,2025-04-04 10:09:00,2025-07-22 10:10:11
+50,Omar,Haddad,omar.haddad@example.com,2 Rue Pasteur,,Marseille,13001,FR,bronze,active,True,2025-02-10 08:00:45,2025-07-15 18:06:00
+51,Paul,Henry,paul.HENRY@EXAMPLE.COM,3 Impasse des Arts,,Nantes,44000,FR,silver,active,True,2024-11-01 10:11:00,2025-05-10 11:00:05

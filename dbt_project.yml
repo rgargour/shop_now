@@ -1,4 +1,3 @@
-
 name: ShopNow        # nom du projet (même que profiles.yml si possible)
 version: 1.0
 config-version: 2
@@ -13,6 +12,32 @@ snapshot-paths: ["snapshots"]
 
 models:
   ShopNow:
+    +pre-hook:
+        - sql: |-
+            insert into tec.__dbt_model_logs (
+              invocation_id, node_name, 
+              relation, materialization, 
+              status, started_at
+            ) values (
+              '{{ invocation_id }}',
+              '{{ this.name }}',
+              '{{ this }}',
+              '{{ model.config.materialized }}',
+              'running',
+              now()
+            )
+          transaction: false  
+    +post-hook:
+        - sql: |-
+            update tec.__dbt_model_logs
+            set
+              finished_at = now(),
+              duration_ms = date_diff('millisecond', started_at, 
+              now()),
+              status = 'success'
+            where invocation_id = '{{ invocation_id }}'
+              and node_name = '{{ this.name }}'
+          transaction: false  
     silver:                
       +materialized: view
       +schema: silver
@@ -20,3 +45,33 @@ models:
       +materialized: table
       +schema: gold
 
+seeds:
+  ShopNow:
+    +schema: silver
+    +quote_columns: false
+
+
+on-run-start:
+  - |
+      CREATE SCHEMA IF NOT EXISTS tec;
+      create table if not exists tec.__dbt_model_logs (
+        invocation_id   text,
+        node_name       text,
+        relation        text,
+        materialization text,
+        status          text default 'running',
+        started_at      timestamp,
+        finished_at     timestamp,
+        duration_ms     bigint
+      );
+
+on-run-end:
+  - |
+      UPDATE tec.__dbt_model_logs
+      set
+        status = case when status = 'running' then 'failed' 
+        else status end,
+        finished_at = coalesce(finished_at, current_timestamp),
+        duration_ms = coalesce(duration_ms, date_diff('millisecond', 
+        started_at, current_timestamp))
+      where invocation_id = '{{ invocation_id }}';

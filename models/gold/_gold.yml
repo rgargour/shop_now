@@ -1,0 +1,210 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      Customer dimension built from ref('stg_customers'). Provides a curated,
+      analytics-friendly view with a computed full_name and key profile fields.
+      One row per customer_id.
+    columns:
+      - name: customer_id
+        description: Unique identifier of the customer.
+        tests:
+          - not_null
+          - unique
+
+      - name: first_name
+        description: Customer first name.
+
+      - name: last_name
+        description: Customer last name.
+
+      - name: full_name
+        description: Convenience field concatenating first and last name.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " = concat(first_name, ' ', last_name)"
+
+      - name: email
+        description: Normalized customer email.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " LIKE '%@%'"
+
+      - name: loyalty_tier
+        description: Loyalty program tier (if enrolled).
+
+      - name: customer_status
+        description: Business status label for the customer (e.g., active/inactive/prospect).
+
+      - name: marketing_opt_in
+        description: Whether the customer consented to receive marketing communications.
+        tests:
+          - accepted_values:
+              values: [true, false]
+
+      - name: address_line1
+        description: Primary street address.
+
+      - name: address_line2
+        description: Secondary address information (apt, suite, etc.).
+
+      - name: city
+        description: City of the mailing address.
+
+      - name: postal_code
+        description: Postal or ZIP code.
+
+      - name: country
+        description: Country associated with the address (preferably ISO name or code).
+
+      - name: created_at
+        description: Timestamp when the customer record was first created in the source.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " <= current_timestamp"
+
+      - name: updated_at
+        description: Timestamp of the last update observed in the source.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " >= created_at"
+  - name: dim_products
+    description: >
+      Product dimension built from ref('stg_products'). Normalized product attributes with
+      a computed tax-included price (list_price_ttc). One row per product_id.
+    columns:
+      - name: product_id
+        description: Unique identifier of the product.
+        tests:
+          - not_null
+          - unique
+
+      - name: product_name
+        description: Product name (normalized in staging).
+        tests:
+          - not_null
+
+      - name: category_id
+        description: Category key of the product.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_categories')
+              field: category_id
+
+      - name: brand
+        description: Product brand (normalized in staging).
+
+      - name: supplier_id
+        description: Supplier identifier.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_suppliers')
+              field: supplier_id
+
+      - name: list_price
+        description: Suggested retail price (excluding VAT).
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: cost_price
+        description: Purchase cost of the product.
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: vat_rate
+        description: VAT rate as a fraction (e.g., 0.20 for 20%).
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+
+      - name: list_price_ttc
+        description: Tax-included price = list_price * (1 + COALESCE(vat_rate, 0)).
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " = list_price * (1 + coalesce(vat_rate, 0))"
+
+      - name: is_active
+        description: Whether the product is active in the catalog.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+
+      - name: created_at
+        description: Timestamp when the record was created in the source.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " <= current_timestamp"
+
+      - name: updated_at
+        description: Timestamp of the last update in the source.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " >= created_at"
+
+  - name: fct_orders
+    description: >
+      Fact table of orders enriched with customer attributes. Built from
+      ref('stg_orders') and left-joined to ref('dim_customers') for the
+      customer name. Incremental in 'append' mode, using created_at as
+      the watermark (new rows have created_at > max(created_at) in target).
+    columns:
+      - name: order_id
+        description: Business key of the order.
+        tests:
+          - not_null
+          - unique
+
+      - name: order_date
+        description: Date the order was placed (DATE).
+
+      - name: order_month
+        description: First day of the month of order_date (month-truncated).
+
+      - name: status_description
+        description: Human-friendly status label derived in staging.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " <> 'unknown'"
+              config:
+                severity: warn
+
+      - name: amount
+        description: Order amount in source currency.
+
+      - name: customer_id
+        description: Customer identifier (from dimension; may be null if no match).
+        tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+              config:
+                severity: warn
+
+      - name: customer_name
+        description: Denormalized customer full name from the dimension (may be null).
+
+      - name: created_at
+        description: Ingestion/creation timestamp used for incremental append logic.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " <= current_timestamp"

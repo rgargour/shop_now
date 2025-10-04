@@ -1,0 +1,220 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: >
+      Curated customer table built from source('ecommerce','customers_raw').
+      Emails are trimmed and lowercased; duplicates per customer_id are removed
+      by keeping the most recent record (created_at/updated_at ordering).
+    columns:
+      - name: customer_id
+        description: Unique identifier of the customer.
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: source('ecommerce', 'customers_raw')
+              field: customer_id
+
+      - name: first_name
+        description: Customer first name.
+
+      - name: last_name
+        description: Customer last name.
+
+      - name: email
+        description: Normalized customer email (lowercased, whitespace removed).
+        tests:
+          - not_null
+
+      - name: address_line1
+        description: Primary street address.
+
+      - name: address_line2
+        description: Secondary address information (apt, suite, etc.).
+
+      - name: city
+        description: City of the mailing address.
+
+      - name: postal_code
+        description: Postal or ZIP code.
+
+      - name: country
+        description: Country associated with the address (preferably ISO name or code).
+
+      - name: loyalty_tier
+        description: Loyalty program tier for the customer (if enrolled).
+
+      - name: customer_status
+        description: Business status label for the customer (e.g., active/inactive/prospect).
+
+      - name: marketing_opt_in
+        description: Whether the customer has consented to receive marketing communications.
+        tests:
+          - accepted_values:
+              values: [true, false]
+
+      - name: created_at
+        description: Timestamp when the customer record was first created in the source.
+        tests:
+          - not_null
+
+      - name: updated_at
+        description: Timestamp of the last update observed in the source.
+        tests:
+          - not_null
+  - name: stg_orders
+    description: >
+      Cleaned and typed orders table built from source('ecommerce','orders_raw').
+      Incremental in 'append' mode based on created_at, with status label enrichment
+      via ref('status_mapping'). Includes an order month (order_month) derived
+      from order_date.
+    columns:
+      - name: order_id
+        description: Unique identifier of the order.
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Identifier of the customer who placed the order.
+        tests:
+          - not_null:
+              severity: warn
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+              severity: warn
+
+      - name: order_date
+        description: Order date (DATE type).
+        tests:
+          - not_null:
+              severity: warn
+
+      - name: order_month
+        description: First day of the order's month (month-truncated).
+        tests:
+          - not_null:
+              severity: warn
+
+      - name: status
+        description: Raw order status code (before mapping).
+        tests:
+          - relationships:
+              to: ref('status_mapping')
+              field: status
+
+      - name: status_description
+        description: Status label after mapping (or 'unknown' if missing from mapping).
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_utils.expression_is_true:
+              expression: " <> 'unknown'"
+              config:
+                severity: warn
+
+      - name: amount
+        description: Order amount (source currency).
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_utils.expression_is_true:
+              expression: " >= 0"
+              severity: warn
+
+      - name: created_at
+        description: Timestamp when the record was ingested/created in the source.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " <= current_timestamp"
+
+      - name: updated_at
+        description: (Field not present in the current output.)
+
+  - name: stg_products
+    description: >
+      Cleaned and typed products table built from source('ecommerce','products_raw').
+      Labels (product_name, brand) are trimmed and lowercased. Prices are cast to
+      decimals, and rows without product_id are filtered out.
+    columns:
+      - name: product_id
+        description: Unique identifier of the product.
+        tests:
+          - not_null
+          - unique
+
+      - name: product_name
+        description: Product name (normalized trim + lowercase).
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " = trim(lower(product_name))"
+
+      - name: category_id
+        description: Product category key.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_categories')
+              field: category_id
+
+      - name: brand
+        description: Product brand (normalized to lowercase).
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: " is null or brand = trim(lower(brand))"
+
+      - name: supplier_id
+        description: Supplier identifier.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_suppliers')
+              field: supplier_id
+
+      - name: list_price
+        description: Suggested retail price (DECIMAL(18,2)).
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: cost_price
+        description: Purchase cost (DECIMAL(18,2)).
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: vat_rate
+        description: VAT rate (fraction, e.g., 0.20 for 20%).
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+              inclusive: true
+
+      - name: is_active
+        description: Indicates whether the product is active in the catalog.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+
+      - name: created_at
+        description: Timestamp when the record was created in the source.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " <= current_timestamp"
+
+      - name: updated_at
+        description: Timestamp of the last update in the source.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " >= created_at"

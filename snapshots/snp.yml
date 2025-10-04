@@ -1,0 +1,16 @@
+version: 2
+snapshots:
+  - name: customers_scd
+    relation: ref('stg_customers')
+    config:
+      target_schema: silver
+      strategy: check
+      unique_key: "coalesce(customer_id, '__dbt__null__')"
+      check_cols: ['email','loyalty_tier','customer_status', 'marketing_opt_in']
+  - name: products_scd
+    relation: ref('stg_products')
+    config:
+      target_schema: silver
+      strategy: timestamp
+      unique_key: product_id
+      updated_at: updated_at

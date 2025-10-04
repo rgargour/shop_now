@@ -1,0 +1,11 @@
+product_id,product_name,category_id,brand,supplier_id,list_price,cost_price,vat_rate,is_active,created_at,updated_at
+10001,Wireless Mouse,200,LogiTech,5001,24.99,10.5,0.2,True,2024-09-01 10:00:00,2025-01-10 09:00:00
+10002,Mechanical Keyboard,200,KeyPro,5002,89.9,45.0,0.2,True,2024-10-15 12:00:00,2025-03-05 08:30:00
+10003,27in Monitor,210,ViewMax,5003,229.0,120.0,0.2,True,2024-11-20 15:20:00,2025-06-01 10:00:00
+10004,USB-C Cable 1m,220,CableCo,5004,9.99,2.0,0.2,True,2025-01-05 09:30:00,2025-02-15 14:00:00
+10005,Laptop Stand,220,ErgoLift,5005,39.0,15.0,0.2,True,2025-02-18 07:45:00,2025-05-10 13:13:13
+10006,Webcam HD,210,CamX,5006,59.0,22.0,0.2,True,2025-03-25 19:00:00,2025-04-02 08:00:00
+10007,Noise-cancel Headset,230,SoundPro,5007,129.0,60.0,0.2,True,2025-04-30 11:11:00,2025-07-01 09:09:09
+10008,Portable SSD 1TB,230,FastDisk,5008,149.0,80.0,0.2,True,2025-05-10 08:08:08,2025-08-20 10:10:10
+10009,Desk Lamp LED,240,Brightly,5009,25.0,9.0,0.2,True,2025-06-12 12:12:12,2025-07-15 15:00:00
+10010,Ergonomic Chair,240,SitWell,5010,299.0,180.0,0.2,True,2025-07-01 09:00:00,2025-07-25 18:45:00
