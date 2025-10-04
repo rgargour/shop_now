@@ -2,8 +2,8 @@ version: 2
 
 sources:
   - name: ecommerce     
-    database: Ambient_it_dbt    # Nom de la source (utilisé dans dbt)
-    schema: bronze            # Schéma où se trouvent les tables brutes
+    database: ShopNow    
+    schema: bronze            
     
     tables:
       - name: customers_raw
